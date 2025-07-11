@@ -15,7 +15,7 @@ public class GeneralConcatenatorController {
 
     private final GeneralConcatenatorService generalConcatenatorService;
 
-    public GeneralConcatenatorController(@Qualifier("generalConcatenationServiceHardcodedImpl") GeneralConcatenatorService generalConcatenatorService) {
+    public GeneralConcatenatorController(@Qualifier("generalConcatenationServiceImpl") GeneralConcatenatorService generalConcatenatorService) {
 
         this.generalConcatenatorService = generalConcatenatorService;
     }
@@ -30,9 +30,9 @@ public class GeneralConcatenatorController {
     @PostMapping(value = "/all", consumes = "application/json")
     public String concatenateAll(@RequestBody DetailVo detailVo){
 
-        log.info("Entered: healthCheck|"+getClass().getName());
+        log.info("Entered: concatenateAll|"+getClass().getName());
         final String concatenatedString = generalConcatenatorService.getCompleteMessageComponents(detailVo);
-        log.info("Exited: healthCheck|"+getClass().getName());
+        log.info("Exited: concatenateAll|"+getClass().getName());
         return concatenatedString;
     }
 }
