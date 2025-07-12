@@ -1,5 +1,6 @@
 package com.centime.concatenator.service.Impl;
 
+import com.centime.concatenator.exception.NoSuchCustomerExistsException;
 import com.centime.concatenator.service.GeneralConcatenatorService;
 import com.centime.concatenator.vo.DetailVo;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -26,10 +28,16 @@ public class GeneralConcatenatorServiceImpl implements GeneralConcatenatorServic
     @Override
     public String getCompleteMessageComponents(DetailVo detailVo) {
         log.info("Entered: getCompleteMessageComponents|"+getClass().getName());
-        final String helloMessage = getGreetingMessage();
-        final String nameConcatenated = getNameConcatenated(detailVo);
-        log.info("Exited: getCompleteMessageComponents|"+getClass().getName());
-        return helloMessage.concat(" ").concat(nameConcatenated);
+        try {
+            final String helloMessage = getGreetingMessage();
+            final String nameConcatenated = getNameConcatenated(detailVo);
+            log.info("Exited: getCompleteMessageComponents|" + getClass().getName());
+            return helloMessage.concat(" ").concat(nameConcatenated);
+        }
+        catch(Exception ex){
+            log.error(ex.getMessage()+"|getCompleteMessageComponents|"+getClass().getName());
+            throw new NoSuchCustomerExistsException("Service not reachable");
+        }
     }
 
     private String getNameConcatenated(DetailVo detailVo) {
@@ -37,7 +45,6 @@ public class GeneralConcatenatorServiceImpl implements GeneralConcatenatorServic
         log.info("Exited: getNameConcatenated|"+getClass().getName());
         return webClient.post()
                 .uri(nameUrl)
-                //.uri("http://localhost:8082/v1/centime/name/concatenator")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(detailVo)
                 .retrieve()
@@ -50,7 +57,6 @@ public class GeneralConcatenatorServiceImpl implements GeneralConcatenatorServic
         log.info("Exited: getGreetingMessage|"+getClass().getName());
         return webClient.get()
                 .uri(helloUrl)
-                //.uri("http://localhost:8081/v1/centime/hello/message")
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

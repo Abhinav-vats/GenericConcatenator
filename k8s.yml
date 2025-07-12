@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generic-message
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generic-message
+  template:
+    metadata:
+      labels:
+        app: generic-message
+    spec:
+      containers:
+        - name: generic-message
+          image: 686754180139.dkr.ecr.ap-south-1.amazonaws.com/centime/generic-message:latest  # Updated line
+          env:
+            - name: HELLO_URL
+              value: "http://hello-message-service/v1/centime/hello/message"
+            - name: NAME_URL
+              value: "http://name-concatenate-service/v1/centime/name/concatenator"
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generic-message-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: generic-message
+  ports:
+    - protocol: TCP
+      port: 80              # The port that the service will expose externally
+      targetPort: 8080      # The port on which the Flask app is running inside the container
